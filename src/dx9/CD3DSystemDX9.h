@@ -13,7 +13,7 @@ namespace D3DPlugin
         private:
             bool m_bD3DHookInstalled;
             std::vector<ID3DEventListener*> m_vecQueue;
-
+            CryMutex m_RenderMutex;
             void hookD3D( bool bHook );
         public:
             int m_nTextureMode;
@@ -57,13 +57,13 @@ namespace D3DPlugin
             ITexture* InjectTexture( void* pD3DTextureSrc, int nWidth, int nHeight, ETEX_Format eTF, int flags );
 
         public:
-            DECLARE_REGISTER_LISTENER( m_vecQueue );
-            DECLARE_UNREGISTER_LISTENER( m_vecQueue );
-            DECLARE_BROADCAST_EVENT( m_vecQueue, OnPrePresent );
-            DECLARE_BROADCAST_EVENT( m_vecQueue, OnPostPresent );
-            DECLARE_BROADCAST_EVENT( m_vecQueue, OnPreReset );
-            DECLARE_BROADCAST_EVENT( m_vecQueue, OnPostReset );
-            DECLARE_BROADCAST_EVENT( m_vecQueue, OnPostBeginScene );
+            DECLARE_REGISTER_LISTENER( m_vecQueue, m_RenderMutex );
+            DECLARE_UNREGISTER_LISTENER( m_vecQueue, m_RenderMutex );
+            DECLARE_BROADCAST_EVENT( m_vecQueue, OnPrePresent, m_RenderMutex );
+            DECLARE_BROADCAST_EVENT( m_vecQueue, OnPostPresent, m_RenderMutex );
+            DECLARE_BROADCAST_EVENT( m_vecQueue, OnPreReset, m_RenderMutex );
+            DECLARE_BROADCAST_EVENT( m_vecQueue, OnPostReset, m_RenderMutex );
+            DECLARE_BROADCAST_EVENT( m_vecQueue, OnPostBeginScene, m_RenderMutex );
 
             virtual int GetFeatureLevel();
 

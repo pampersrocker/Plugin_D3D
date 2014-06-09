@@ -15,9 +15,10 @@
 /**
 * @brief small listener helper for event broadcasting
 */
-#define DECLARE_BROADCAST_EVENT(QUEUE, METHOD, ...) \
+#define DECLARE_BROADCAST_EVENT(QUEUE, METHOD, MUTEX, ...) \
     void METHOD() \
     { \
+        AUTO_LOCK_T(CryMutex, MUTEX);\
         if(m_bD3DHookInstalled) \
             for(auto iterQueue = QUEUE.begin(); iterQueue!=QUEUE.end(); ++iterQueue) \
                 (*iterQueue)->METHOD(__VA_ARGS__); \
@@ -26,9 +27,10 @@
 /**
 * @brief small listener helper for registering listeners
 */
-#define DECLARE_REGISTER_LISTENER(QUEUE) \
+#define DECLARE_REGISTER_LISTENER(QUEUE, MUTEX) \
     void RegisterListener( ID3DEventListener* item )\
     {\
+        AUTO_LOCK_T(CryMutex, MUTEX);\
         QUEUE.push_back( item );\
         \
         if ( !m_bD3DHookInstalled && QUEUE.size() > 0 )\
@@ -40,9 +42,10 @@
 /**
 * @brief small listener helper for unregistering listeners
 */
-#define DECLARE_UNREGISTER_LISTENER(QUEUE) \
+#define DECLARE_UNREGISTER_LISTENER(QUEUE, MUTEX) \
     void UnregisterListener( ID3DEventListener* item )\
     {\
+        AUTO_LOCK_T(CryMutex, MUTEX);\
         for ( auto iterQueue = QUEUE.begin(); iterQueue != QUEUE.end(); ++iterQueue )\
         {\
             if ( ( *iterQueue ) == item )\
