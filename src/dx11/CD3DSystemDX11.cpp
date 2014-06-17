@@ -20,25 +20,30 @@ D3DPlugin::CD3DSystem11* D3DPlugin::gD3DSystem11 = NULL;
 #define METHOD Present
 GEN_HOOK( UINT SyncInterval, UINT Flags )
 {
-    if ( !D3DPlugin::gD3DSystem11->m_pSwapChain && D3DPlugin::gD3DSystem11->m_pDevice )
+    if ( D3DPlugin::gD3DSystem11 )
     {
-        ID3D11Device* pSwapChainDevice = NULL;
-        HRESULT hrg = This->GetDevice( __uuidof( ID3D11Device ), ( void** )&pSwapChainDevice );
 
-        if ( pSwapChainDevice == D3DPlugin::gD3DSystem11->m_pDevice )
+        if ( !D3DPlugin::gD3DSystem11->m_pSwapChain && D3DPlugin::gD3DSystem11->m_pDevice )
         {
-            D3DPlugin::gD3DSystem11->m_pSwapChain = This;
+            ID3D11Device* pSwapChainDevice = NULL;
+            HRESULT hrg = This->GetDevice( __uuidof( ID3D11Device ), ( void** ) &pSwapChainDevice );
 
-            D3DPlugin::gPlugin->LogAlways( "DXGI swap chain retrieved" );
+            if ( pSwapChainDevice == D3DPlugin::gD3DSystem11->m_pDevice )
+            {
+                D3DPlugin::gD3DSystem11->m_pSwapChain = This;
+
+                D3DPlugin::gPlugin->LogAlways( "DXGI swap chain retrieved" );
+            }
         }
     }
 
-    bool bEngineSwapChain = D3DPlugin::gD3DSystem11->m_pSwapChain == This;
+    bool bEngineSwapChain = D3DPlugin::gD3DSystem11 && D3DPlugin::gD3DSystem11->m_pSwapChain == This;
 
     if ( bEngineSwapChain )
     {
         D3DPlugin::gD3DSystem11->OnPrePresent();
     }
+
 
     CALL_ORGINAL( SyncInterval, Flags );
 
@@ -48,9 +53,11 @@ GEN_HOOK( UINT SyncInterval, UINT Flags )
         D3DPlugin::gD3DSystem11->OnPostBeginScene(); // doesn't exist in dx11, but keep for compatibility
     }
 
-    rehookVT( This, IDXGISwapChain, Present );
 
+    rehookVT( This, IDXGISwapChain, Present );
     return hr;
+
+
 }
 #undef METHOD
 
