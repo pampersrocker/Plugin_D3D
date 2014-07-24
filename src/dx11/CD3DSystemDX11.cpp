@@ -47,6 +47,8 @@ GEN_HOOK( UINT SyncInterval, UINT Flags )
 
     CALL_ORGINAL( SyncInterval, Flags );
 
+    bEngineSwapChain = D3DPlugin::gD3DSystem11 && D3DPlugin::gD3DSystem11->m_pSwapChain == This;
+
     if ( bEngineSwapChain )
     {
         D3DPlugin::gD3DSystem11->OnPostPresent();
